@@ -8,50 +8,83 @@
 
 import UIKit
 
-var sectionNames = ["Channel", "Quora", "Events", "Profile", "Settings"]
+var sectionNames = ["Food", "Household Services", "Transport", "Health Services", "Beauty and Wellness"]
+
+var settingNames = ["Profile", "Saved Searches"]
 
 
 class SideScrollViewController: UITableViewController {
-
+    
+    var locationName: String!
+    var tapGestureFastDel: UITapGestureRecognizer!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         self.view.backgroundColor = UIColor(red: 210/255.0, green: 35/255.0, blue: 42/255.0, alpha: 1.0)
         self.tableView.tableFooterView = UIView()
         
         
         // Do any additional setup after loading the view.
     }
-    override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        return "Home"
-    }
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
+        // Dispose of any resources that can be recreated. UITapGestureRecognizer(target: self, action: #selector (resultFastestViewTapped))
     }
     
-    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = UITableViewCell()
-        cell.textLabel?.text = sectionNames[indexPath.row]
-        cell.backgroundColor = UIColor(red: 210/255.0, green: 35/255.0, blue: 42/255.0, alpha: 1.0)
+    
+    override func tableView(_ tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int)
+    {
+        let header = view as! UITableViewHeaderFooterView
+        let background = UIView()
+        background.backgroundColor = UIColor(red: 230, green: 57, blue: 55, alpha: 1.0)
+        header.backgroundView = UIView()
+        header.textLabel?.textAlignment = NSTextAlignment.center
+        header.textLabel?.textColor = UIColor.white
         
-        cell.textLabel?.textColor = UIColor.white
+        if (section == 0) {
+            header.textLabel?.text = locationName
+            
+        }
+        else {
+            header.textLabel?.text = "Settings"
+            
+        }
+    }
+    
+    override func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+        return 80
         
-        return cell
     }
     
     override func numberOfSections(in tableView: UITableView) -> Int {
-        return 1
+        return 2
+    }
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = UITableViewCell()
+        cell.backgroundColor = UIColor(red: 210/255.0, green: 35/255.0, blue: 42/255.0, alpha: 1.0)
+        
+        cell.textLabel?.textColor = UIColor.white
+        if indexPath.section == 0 {
+            cell.textLabel?.text = sectionNames[indexPath.row]
+        }
+        else {
+            cell.textLabel?.text = settingNames[indexPath.row]
+        }
+        return cell
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return sectionNames.count
+        if (section == 0) {
+            return sectionNames.count
+        }
+        else {
+            return settingNames.count
+        }
     }
     override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 50
     }
     
-    override func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-        return 80
-    }
+    
 }

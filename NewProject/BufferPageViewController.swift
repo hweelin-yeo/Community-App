@@ -1,19 +1,25 @@
+
 //
-//  LoginPageViewController.swift
+//  BufferPageViewController.swift
 //  NewProject
 //
-//  Created by Yeo Hwee Lin on 6/10/17.
+//  Created by Yeo Hwee Lin on 6/16/17.
 //  Copyright © 2017 Yeo Hwee Lin. All rights reserved.
 //
 
 import UIKit
 import CoreLocation
+import JSQMessagesViewController
 
-class LoginPageViewController: UIViewController, CLLocationManagerDelegate {
+class BufferPageViewController: UIViewController, CLLocationManagerDelegate {
+    
+    @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
     
     var locationHERE: String!
     let locationManager = CLLocationManager()
-    
+    var lat: Double!
+    var long: Double!
+    var coords: Double!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -22,34 +28,28 @@ class LoginPageViewController: UIViewController, CLLocationManagerDelegate {
         locationManager.requestWhenInUseAuthorization()
         
         if CLLocationManager.locationServicesEnabled() {
-        locationManager.desiredAccuracy = kCLLocationAccuracyBest
-        locationManager.delegate = self
-        locationManager.startUpdatingLocation()
+            activityIndicator.startAnimating()
+            activityIndicator.hidesWhenStopped = true
+            locationManager.desiredAccuracy = kCLLocationAccuracyBest
+            locationManager.delegate = self
+            
+            DispatchQueue.main.async {
+                self.locationManager.startUpdatingLocation()
+            }
         }
-        addSideVC ()
-        
-    }
-    
-    
-    func addSideVC() {
-        let popUpVC = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "sideScroll")
-        self.addChildViewController(popUpVC)
-        
-        popUpVC.view.frame = CGRect(x: 0, y: 0, width: 150, height: 900)
-        self.view.addSubview(popUpVC.view)
-        popUpVC.didMove(toParentViewController: self)
-        
     }
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         if let location = locations.first {
-            print (location.coordinate.latitude)
-            print (location.coordinate.longitude)
+            lat = location.coordinate.latitude
+            long = location.coordinate.longitude
+            print (lat)
             push(latitude: CGFloat(location.coordinate.latitude), longitude: CGFloat(location.coordinate.longitude))
             locationManager.stopUpdatingLocation()
-        
+            coords = location.coordinate.latitude
+            
         }
-}
+    }
     
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
         if (status == CLAuthorizationStatus.denied) {
@@ -72,9 +72,10 @@ class LoginPageViewController: UIViewController, CLLocationManagerDelegate {
         
         
     }
+    
     func push(latitude: CGFloat, longitude: CGFloat) {
-        var request = URLRequest(url: URL(string: "http://192.168.0.51:5000/geo?lat=1.274367&long=103.842926")!)
-            
+        var request = URLRequest(url: URL(string: "https://desolate-peak-93885.herokuapp.com/api/geo?lat=1.296742&long=103.786664")!)
+        
         request.httpMethod = "GET"
         
         let task = URLSession.shared.dataTask(with: request) {
@@ -90,9 +91,10 @@ class LoginPageViewController: UIViewController, CLLocationManagerDelegate {
             // Print out response string
             let responseString = NSString(data: data!, encoding: String.Encoding.utf8.rawValue)
             
-            print("responseString = \(responseString)")
+            self.locationHERE = responseString! as String!
+            print(self.locationHERE)
             
-            
+            /**
             // Convert server json response to NSDictionary
             do {
                 if let convertedJsonIntoDict = try JSONSerialization.jsonObject(with: data!, options: []) as? NSDictionary {
@@ -109,14 +111,38 @@ class LoginPageViewController: UIViewController, CLLocationManagerDelegate {
             } catch let error as NSError {
                 print(error.localizedDescription)
             }
-            
+            */
         }
         
         task.resume()
         
-        }
+    }
+    
+    
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        
+    }
+    
     override func viewDidAppear(_ animated: Bool) {
-        <#code#>
+        if self.locationHERE != nil {
+            self.perform(#selector(goNext), with: nil, afterDelay: 1.2)
+        }
+        
+        DispatchQueue.main.async {
+            self.perform(#selector(self.goNext), with: nil, afterDelay: 8)
+        }
+    }
+    
+    
+    func goNext() {
+        self.activityIndicator.stopAnimating()
+        let homePageVC = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "homePage") as! HomePageViewController
+        if (locationHERE == nil) {locationHERE = "Ayer Rajah"}
+        homePageVC.locationName = locationHERE
+        self.present(homePageVC, animated: true, completion: nil)
     }
 
+    
+    
 }
